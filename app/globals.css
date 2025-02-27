@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.swiper-button-prev {
+    color: rgb(73, 72, 72) !important;
+}
+
+.swiper-button-next {
+    color: rgb(73, 72, 72) !important;
+}
+
+.swiper-pagination-bullet {
+    background-color: rgb(7, 47, 177) !important; /* Color de los puntos */
+    width: 10px; /* Tamaño */
+    height: 10px;
+  }
+  .swiper-pagination-bullet-active {
+    background-color: rgb(252, 252, 249) !important; /* Color del punto activo */
+  }
