@@ -4,15 +4,16 @@
 import React from 'react';
 import { useState } from 'react';
 import { useEcommerce } from '@/context/Contex';
+import Loading from '@/app/componentes/Loading';
 
-const Register = () => {
-  const { RegisterUser, mensajes, error } = useEcommerce()
+const Login = () => {
+  const { loading, Login, mensajes, error } = useEcommerce()
 
 
 
   const [formData, setFormData] = useState(
     {
-      nombre: '',
+
       email: '',
       password: ''
     }
@@ -26,10 +27,12 @@ const Register = () => {
   }
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await RegisterUser(formData);
+    console.log(formData);
+
+    await Login(formData);
 
     setFormData({
-      nombre: '',
+
       email: '',
       password: ''
     })
@@ -39,15 +42,7 @@ const Register = () => {
   return (
 
     <form onSubmit={handleSubmit} className="max-w-sm mx-auto">
-      <div className="mb-5">
-        <label htmlFor="text" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nombre</label>
-        <input
-          onChange={handlechange}
-          value={formData.nombre}
-          type="text"
-          name="nombre"
-          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Nombre" required />
-      </div>
+
       <div className="mb-5">
         <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"> Email</label>
         <input
@@ -76,14 +71,31 @@ const Register = () => {
         </div>
         <label htmlFor="remember" className="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">Recordar</label>
       </div>
-      <button
-        type="submit"
-        className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Registrar</button>
-      {mensajes && <p>{mensajes}</p>}
-      {error && <p>{error}</p>}
+      <div className=' flex flex-col'>
+        <button
+          type="submit"
+          className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Ingresar</button>
+       
+       
+        <div className='flex justify-center'>
+        <div className='mt-5 '>
+          {mensajes && <p className='text-green-700 text-sm font-bold'>{mensajes}</p>}
+        </div>
+        <div className='mt-5'>
+          {error && <p>{error}</p>}
+        </div>
+
+        <div className='mt-5'>
+          {loading ? <Loading /> : ''}
+        </div>
+
+        </div>
+       
+      </div>
+
     </form>
 
   )
 }
 
-export default Register
+export default Login

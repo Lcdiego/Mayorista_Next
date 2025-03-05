@@ -24,7 +24,7 @@ export default function FullScreenSwiper() {
       pagination={{ clickable: true }} 
       autoplay={{ delay: 5000 }} 
       loop 
-      className="w-screen " 
+      className="w-screen h-60 sm:h-auto" 
     >
       {images.map((src, index) => (
         <SwiperSlide key={index} className="flex justify-center items-center">

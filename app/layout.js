@@ -2,7 +2,7 @@
 import Footer from "./componentes/Footer";
 import Navbar from "./componentes/Navbar";
 import "./globals.css";
-
+import EcommerceProvider from "@/context/Contex";
 
 export const metadata = {
   title: "Camaleon",
@@ -17,6 +17,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="es">
       <body>
+        <EcommerceProvider>
         <header>
           <Navbar />
         </header>
@@ -24,6 +25,7 @@ export default function RootLayout({ children }) {
         <footer>
           <Footer />
         </footer>
+        </EcommerceProvider>
       </body>
     </html>
   );
