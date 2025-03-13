@@ -8,23 +8,64 @@ const EcommerceContext = createContext();
 export const useEcommerce = () => useContext(EcommerceContext);
 
 const EcommerceProvider = ({ children }) => {
-
-    const [token, setToken] = useState(null);
+    const [productos, setProductos] = useState([]);
     const [usuarios, setUsuarios] = useState('');
+    const [usuarioCarrito, setUsuarioCarrito] = useState('');
     const [mensajes, setMensajes] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState('');
-    const [productos, setProductos] = useState([]);
     const router = useRouter()
+console.log(usuarioCarrito);
+
+    useEffect(() => {
+        const fetchProductos = async () => {
+            try {
+                const res = await fetch("/api/Productos/getProductos");
+                const data = await res.json();
+                setProductos(data);
+            } catch (error) {
+                console.error("Error al obtener productos", error);
+            }
+        };
+        fetchProductos();
+    }, []);
 
 
-    const RegisterUser = async (data) => {
-
+    const addCarrito = async (_id) => {
+        console.log(_id, usuarioCarrito);
 
         try {
-            const response = await axios.post('/api/register', data);
-          
+            const response = await axios.post('/api/carrito', { _id , email: usuarioCarrito})
+            setMensajes(response.data.messaje);
 
+        } catch (error) {
+            console.log('no se agrego producto al carrito', error)
+            console.log(error.response.data.message);
+
+        }
+
+
+
+    }
+
+    const eliminarProducto = async (_id) => {
+        try {
+
+            const response = await axios.delete('/api/Productos/delete', { data: { _id } })
+            console.log(response);
+
+
+        } catch (error) {
+            console.log('error para eliminar producto', error);
+
+        }
+
+
+    }
+
+    const RegisterUser = async (data) => {
+        try {
+            const response = await axios.post('/api/register', data);
 
             setMensajes(response.data.message);
             setTimeout(() => {
@@ -39,20 +80,20 @@ const EcommerceProvider = ({ children }) => {
             }, 3000)
         }
     };
+
     const Login = async (data) => {
         setLoading(true)
 
         try {
             const response = await axios.post('/api/login', data);
-           
 
             setLoading(false)
-
             setUsuarios(response.data.user.nombre)
+            setUsuarioCarrito(response.data.user.email)
 
             if (response.data.user.role === 'admin') {
                 router.push('/Sidebar')
-            }else{
+            } else {
                 router.push('/')
             }
         } catch (error) {
@@ -60,18 +101,13 @@ const EcommerceProvider = ({ children }) => {
             setError(error.response.data.message)
         }
     };
+
     const Logout = () => {
-        setToken(null)
         setUsuarios('')
-        setMensajes('Usuario deslogueado correctamente')
-        setTimeout(() => {
-            setMensajes('')
-        }, 3000)
         router.push('/')
     };
 
     const agregarProductos = async (data) => {
-       
         setLoading(true)
         try {
             const response = await axios.post('/api/Productos/addProductos', data)
@@ -79,31 +115,14 @@ const EcommerceProvider = ({ children }) => {
             setMensajes(response.data.message)
         } catch (error) {
             console.log('Error al agregar product')
-            
         }
-
     };
-    useEffect(()=>{
-        const productos = async()=>{
-            try{
-        const response = await axios.get('/api/Productos/getProductos')
- 
-        
-        setProductos(response.data)
-            }catch (error){
-                console.log('Error al obtener productos')
-            }
-        }
-productos()
-    },[])
-
-
 
     return (
-        <EcommerceContext.Provider value={{ RegisterUser, Login, loading, Logout, usuarios, mensajes, error,agregarProductos,productos }}>
+        <EcommerceContext.Provider value={{ productos, eliminarProducto, addCarrito, RegisterUser, Login, loading, Logout, usuarios, mensajes, error, agregarProductos }}>
             {children}
         </EcommerceContext.Provider>
     )
 };
 
-export default EcommerceProvider
+export default EcommerceProvider;

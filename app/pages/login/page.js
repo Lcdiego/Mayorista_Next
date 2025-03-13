@@ -3,8 +3,8 @@
 
 import React from 'react';
 import { useState } from 'react';
-import { useEcommerce } from '@/context/Contex';
-import Loading from '@/app/componentes/Loading';
+import { useEcommerce } from '../../../context/Contex';
+import Loading from '../../componentes/Loading';
 
 const Login = () => {
   const { loading, Login, mensajes, error } = useEcommerce()

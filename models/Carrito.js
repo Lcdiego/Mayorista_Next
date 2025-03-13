@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
-const ProductosSchema = new mongoose.Schema({
+const CarritoSchema = new mongoose.Schema({
+    usuario:{ type: String, required: true },
     Seccion: { type: String, required: true },
     Categoria: { type: String, required: true },
     titulo: { type: String, required: true },
@@ -12,7 +13,7 @@ const ProductosSchema = new mongoose.Schema({
     imagenPublicId:{ type: String, default: null },
     galeriaPublicId: { type: [String], default: [] },
 })
-const Productos = mongoose.models.Productos || mongoose.model("Productos", ProductosSchema);
+const Carrito = mongoose.models.carrito || mongoose.model("carrito", CarritoSchema);
 
 
-export default Productos;
+export default Carrito;

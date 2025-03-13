@@ -2,7 +2,7 @@
 import Footer from "./componentes/Footer";
 import Navbar from "./componentes/Navbar";
 import "./globals.css";
-import EcommerceProvider from "@/context/Contex";
+import EcommerceProvider from "../context/Contex";
 
 export const metadata = {
   title: "Camaleon",

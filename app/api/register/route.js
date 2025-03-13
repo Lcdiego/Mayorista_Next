@@ -1,10 +1,10 @@
-import { DB } from '@/lib/db';
+import { DB } from '../../../lib/db';
 import { NextResponse } from 'next/server';
-import User from '@/models/Users';
-import bcrypt from 'bcryptjs';  // Importar bcrypt para encriptar la contraseña
+import User from '../../../models/Users';
+import bcrypt from 'bcryptjs'; 
 
 export async function POST(req) {
-    await DB(); // Conexión a la base de datos
+    await DB(); 
     try {
         const { nombre, email, password } = await req.json();
 
@@ -24,7 +24,7 @@ export async function POST(req) {
         const hashedPassword = await bcrypt.hash(password, 10);
 
         // Crear nuevo usuario
-        const newUser = new User({ nombre, email, password: hashedPassword, role: 'admin' });
+        const newUser = new User({ nombre, email, password: hashedPassword, role: 'user' });
         await newUser.save();
 
         return NextResponse.json(
