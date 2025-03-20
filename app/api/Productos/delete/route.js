@@ -7,9 +7,10 @@ export async function DELETE(req) {
    await DB()
    try {
       const { _id } = await req.json()
-      const producto = await Productos.findById(_id)
-      console.log(producto);
       console.log(_id);
+      
+      const producto = await Productos.findById(_id)
+    
 
 
       if (!producto)

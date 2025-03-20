@@ -5,7 +5,7 @@ import { Home, Inbox, Users, Settings, Menu } from "lucide-react";
 import Link from "next/link";
 
 const menuItems = [
-  { title: "Dashboard", icon: Home, path: "/" },
+  { title: "productos admin", icon: Home, path: "/pages/productos-admin" },
   { title: "Inbox", icon: Inbox, path: "/inbox" },
   { title: "Users", icon: Users, path: "/users" },
   { title: "Settings", icon: Settings, path: "/settings" },

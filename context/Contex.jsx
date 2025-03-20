@@ -9,13 +9,16 @@ export const useEcommerce = () => useContext(EcommerceContext);
 
 const EcommerceProvider = ({ children }) => {
     const [productos, setProductos] = useState([]);
-    const [usuarios, setUsuarios] = useState('');
-    const [usuarioCarrito, setUsuarioCarrito] = useState('');
+    const [usuario, setUsuario] = useState('');
+
+    const [carrito, setCarrito] = useState([]);
     const [mensajes, setMensajes] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState('');
     const router = useRouter()
-console.log(usuarioCarrito);
+
+    console.log(carrito);
+
 
     useEffect(() => {
         const fetchProductos = async () => {
@@ -30,22 +33,56 @@ console.log(usuarioCarrito);
         fetchProductos();
     }, []);
 
+    // Mueve fetchCarrito fuera del useEffect para que sea accesible globalmente
+    const fetchCarrito = async () => {
+        try {
+            const response = await fetch('/api/carritoGet');
+            const data = await response.json();
+
+            const carrito = data.carrito;
+            console.log(carrito);
+
+            const carritoUser = carrito.filter((item) => item.usuario === usuario._id);
+
+            console.log(carritoUser);
+
+            setCarrito(carritoUser);
+        } catch (error) {
+            console.error('Error al obtener carrito', error);
+        }
+    };
+
+    useEffect(() => {
+        if (usuario._id) {
+            fetchCarrito();
+        }
+    }, [usuario._id]);
 
     const addCarrito = async (_id) => {
-        console.log(_id, usuarioCarrito);
-
         try {
-            const response = await axios.post('/api/carrito', { _id , email: usuarioCarrito})
+            const response = await axios.post('/api/carrito', { _id, idCarrito: usuario._id });
             setMensajes(response.data.messaje);
 
+
+            fetchCarrito();
         } catch (error) {
-            console.log('no se agrego producto al carrito', error)
+            console.log('No se agregó producto al carrito', error);
             console.log(error.response.data.message);
+        }
+    };
+    const eliminarProductoCart = async (_id) => {
+        console.log(_id);
+        
+        try {
+            const response = await axios.delete('/api/carritoDelete',{data:{_id}})
+            console.log(response);
+            fetchCarrito();
+
+        } catch (error) {
+            console.log('error al eliminar producto del carrito', error);
+
 
         }
-
-
-
     }
 
     const eliminarProducto = async (_id) => {
@@ -88,8 +125,9 @@ console.log(usuarioCarrito);
             const response = await axios.post('/api/login', data);
 
             setLoading(false)
-            setUsuarios(response.data.user.nombre)
-            setUsuarioCarrito(response.data.user.email)
+            setUsuario(response.data.user)
+
+
 
             if (response.data.user.role === 'admin') {
                 router.push('/Sidebar')
@@ -103,7 +141,7 @@ console.log(usuarioCarrito);
     };
 
     const Logout = () => {
-        setUsuarios('')
+        setUsuario('')
         router.push('/')
     };
 
@@ -113,13 +151,16 @@ console.log(usuarioCarrito);
             const response = await axios.post('/api/Productos/addProductos', data)
             setLoading(false)
             setMensajes(response.data.message)
+            setTimeout(()=>{
+                setMensajes('')
+            },3000)
         } catch (error) {
             console.log('Error al agregar product')
         }
     };
 
     return (
-        <EcommerceContext.Provider value={{ productos, eliminarProducto, addCarrito, RegisterUser, Login, loading, Logout, usuarios, mensajes, error, agregarProductos }}>
+        <EcommerceContext.Provider value={{ productos, eliminarProducto, eliminarProductoCart, addCarrito, carrito, RegisterUser, Login, loading, Logout, usuario, mensajes, error, agregarProductos }}>
             {children}
         </EcommerceContext.Provider>
     )

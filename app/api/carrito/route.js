@@ -5,19 +5,19 @@ import User from "@/models/Users";
 import { NextResponse } from "next/server";
 
 export async function POST(req) {
-    await DB();  // Asegúrate de que esta función haga lo correcto
+    await DB();  
     try {
-        const { _id, email } = await req.json();  // Obtener _id del cuerpo de la solicitud
+        const { _id, idCarrito } = await req.json(); 
         console.log(_id);
         
-        const producto = await Productos.findById(_id);  // Buscar el producto
-        const usuario =await User.findOne({email:email});
+        const producto = await Productos.findById(_id);  
+        const usuario =await User.findById(idCarrito);
 
         if (!producto && usuario) {
             return NextResponse.json({ message: 'No se encontró el producto' }, { status: 404 });
         }
 
-        // Aquí debes definir cómo obtener las variables, por ejemplo:
+     
         const { Seccion, Categoria, titulo, precio, stock, descripcion, imagen, galeria, imagenPublicId, galeriaPublicId } = producto;
 
         const carrito = new Carrito({
@@ -34,11 +34,11 @@ export async function POST(req) {
             galeriaPublicId
         });
 
-        await carrito.save();  // Guardar el carrito en la base de datos
-        return NextResponse.json({ message: 'Carrito agregado con éxito' }, { status: 200 });
+        await carrito.save();  
+        return NextResponse.json({ message: 'Carrito agregado con éxito', carrito }, { status: 200 });
 
     } catch (error) {
-        console.error(error);  // Es útil para depurar el error
+        console.error(error);  
         return NextResponse.json({ message: 'Error al guardar carrito', error }, { status: 500 });
     }
 }

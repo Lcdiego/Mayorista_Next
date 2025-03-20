@@ -4,10 +4,13 @@
 
 .swiper-button-prev {
     color: rgb(73, 72, 72) !important;
+    
 }
 
 .swiper-button-next {
     color: rgb(73, 72, 72) !important;
+    
+    
 }
 
 .swiper-pagination-bullet {
@@ -17,4 +20,8 @@
   }
   .swiper-pagination-bullet-active {
     background-color: rgb(252, 252, 249) !important; /* Color del punto activo */
+  }
+
+  .imgSesion {
+    background-image: url('/imgLogin.jpg');
   }

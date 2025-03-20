@@ -8,7 +8,7 @@ export async function POST(req) {
     const { Seccion, Categoria, titulo, precio, stock, descripcion, imagen, galeria } = await req.json(); 
 
     
-console.log(Seccion, Categoria, titulo, precio, stock, descripcion, imagen, galeria);
+
 
     await DB();
 

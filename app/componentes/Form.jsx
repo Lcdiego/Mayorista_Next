@@ -35,8 +35,8 @@ const Form = () => {
 
 
         const toBase64 = (file) =>
-            
-            
+
+
             new Promise((resolve, reject) => {
                 const reader = new FileReader();
                 reader.readAsDataURL(file);
@@ -52,6 +52,21 @@ const Form = () => {
             ? await Promise.all(formData.galeria.map(toBase64))
             : [];
         agregarProductos({ ...formData, imagen: imageBase64, galeria: galleryBase64 })
+
+        setTimeout(() => {
+            setFormData({
+                Seccion: '',
+                Categoria: '',
+                titulo: '',
+                precio: '',
+                stock: '',
+                descripcion: '',
+                imagen: '',
+                galeria: ''
+            })
+        }, 3000);
+
+      
 
     }
 
