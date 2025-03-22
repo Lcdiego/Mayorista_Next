@@ -10,15 +10,17 @@ export const useEcommerce = () => useContext(EcommerceContext);
 const EcommerceProvider = ({ children }) => {
     const [productos, setProductos] = useState([]);
     const [usuario, setUsuario] = useState('');
-
     const [carrito, setCarrito] = useState([]);
     const [mensajes, setMensajes] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState('');
+    const [seleccionarProductId, setSeleccionarProduct]=useState('');
     const router = useRouter()
 
-    console.log(carrito);
 
+const detalle=(_id)=>{
+    setSeleccionarProduct(_id)
+}
 
     useEffect(() => {
         const fetchProductos = async () => {
@@ -33,18 +35,18 @@ const EcommerceProvider = ({ children }) => {
         fetchProductos();
     }, []);
 
-    // Mueve fetchCarrito fuera del useEffect para que sea accesible globalmente
+   
     const fetchCarrito = async () => {
         try {
             const response = await fetch('/api/carritoGet');
             const data = await response.json();
 
             const carrito = data.carrito;
-            console.log(carrito);
+          
 
             const carritoUser = carrito.filter((item) => item.usuario === usuario._id);
 
-            console.log(carritoUser);
+        
 
             setCarrito(carritoUser);
         } catch (error) {
@@ -71,10 +73,10 @@ const EcommerceProvider = ({ children }) => {
         }
     };
     const eliminarProductoCart = async (_id) => {
-        console.log(_id);
-        
+       
+
         try {
-            const response = await axios.delete('/api/carritoDelete',{data:{_id}})
+            const response = await axios.delete('/api/carritoDelete', { data: { _id } })
             console.log(response);
             fetchCarrito();
 
@@ -151,16 +153,16 @@ const EcommerceProvider = ({ children }) => {
             const response = await axios.post('/api/Productos/addProductos', data)
             setLoading(false)
             setMensajes(response.data.message)
-            setTimeout(()=>{
+            setTimeout(() => {
                 setMensajes('')
-            },3000)
+            }, 3000)
         } catch (error) {
             console.log('Error al agregar product')
         }
     };
 
     return (
-        <EcommerceContext.Provider value={{ productos, eliminarProducto, eliminarProductoCart, addCarrito, carrito, RegisterUser, Login, loading, Logout, usuario, mensajes, error, agregarProductos }}>
+        <EcommerceContext.Provider value={{seleccionarProductId,detalle, productos, eliminarProducto, eliminarProductoCart, addCarrito, carrito, RegisterUser, Login, loading, Logout, usuario, mensajes, error, agregarProductos }}>
             {children}
         </EcommerceContext.Provider>
     )

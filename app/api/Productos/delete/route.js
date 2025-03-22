@@ -7,7 +7,7 @@ export async function DELETE(req) {
    await DB()
    try {
       const { _id } = await req.json()
-      console.log(_id);
+     
       
       const producto = await Productos.findById(_id)
     
@@ -15,10 +15,10 @@ export async function DELETE(req) {
 
       if (!producto)
          return NextResponse.json({ message: 'no se recibieron datos del producto' }, { status: 404 });
-      // Eliminar imagen principal
+   
       await cloudinary.uploader.destroy(producto.imagenPublicId);
 
-      // Eliminar imágenes de la galería
+     
       await Promise.all(
          producto.galeriaPublicId.map((publicId) => cloudinary.uploader.destroy(publicId))
       );

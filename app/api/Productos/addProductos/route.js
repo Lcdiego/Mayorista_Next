@@ -12,12 +12,12 @@ export async function POST(req) {
 
     await DB();
 
-    // Validar los datos
+  
     if (!Seccion || !Categoria || !titulo || !precio || !stock || !descripcion || !imagen || !galeria) {
       return NextResponse.json({ message: "Todos los campos son obligatorios" }, { status: 400 });
     }
 
-    // Subir imagen principal a Cloudinary
+ 
     const uploadResponse = await cloudinary.uploader.upload(imagen, { folder: "products" });
     const imagePath = uploadResponse.secure_url;
     const imagenPublicId= uploadResponse.public_id
@@ -25,7 +25,7 @@ export async function POST(req) {
    
 
 
-    // Subir galería a Cloudinary
+    
     const galleryPaths = [];
     const galeriaPublicId=[]
     
@@ -37,7 +37,6 @@ export async function POST(req) {
       galeriaPublicId.push(res.public_id)
     }
 
-    // Guardar en la base de datos
     const productos = new Productos({
       Seccion,
       Categoria,
@@ -53,7 +52,7 @@ export async function POST(req) {
 
     await productos.save();
 
-    // Enviar respuesta correcta
+   
     return NextResponse.json({ message: "Producto agregado con éxito" }, { status: 201 });
 
   } catch (error) {

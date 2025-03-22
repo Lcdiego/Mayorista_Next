@@ -8,7 +8,7 @@ export async function POST(req) {
     await DB();  
     try {
         const { _id, idCarrito } = await req.json(); 
-        console.log(_id);
+ 
         
         const producto = await Productos.findById(_id);  
         const usuario =await User.findById(idCarrito);

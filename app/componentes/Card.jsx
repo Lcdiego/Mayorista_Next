@@ -5,16 +5,20 @@ import Link from "next/link";
 import BotonCarrito from "./botonCarrito";
 import BotonEditar from "./BotonEditar";
 import BotonEliminar from "./BotonEliminar";
+import { useEcommerce } from "@/context/Contex";
+
 
 const Card = ({ titulo, precio, stock, imagen, _id, BotonHome = false, botonEliminarAdmin = false, BotonEditarAdmin = false }) => {
 
+const {detalle}=useEcommerce()
     return (
 
 
         <div className="max-w-sm mx-5 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
-            <Link href="#">
+             <Link href={'/pages/detalle-producto' } onClick={()=> detalle(_id)} >
+             
                 <div className="flex justify-center" >
-                    <Image width={500} height={500} className="rounded-t-lg mt-5 h-40 sm:w-auto sm:h-60 object-contain" src={imagen} alt={titulo} />
+                    <Image width={500} height={500} className="rounded-t-lg mt-5 h-40 sm:w-auto sm:h-60 object-contain" src={imagen || '/default-image.jpg'} alt={titulo} />
                 </div>
 
             </Link>

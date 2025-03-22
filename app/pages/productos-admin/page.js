@@ -7,7 +7,7 @@ import Card from "@/app/componentes/Card"
 
 const ProductosAdmin = () => {
     const { productos } = useEcommerce()
-    console.log(productos);
+ 
 
     return (
         <div className=" ">

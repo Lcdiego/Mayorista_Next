@@ -12,7 +12,7 @@ export async function POST(req) {
             return NextResponse.json({ message: "Todos los campos son obligatorios" }, { status: 400 });
         }
 
-        // Verificar si el usuario ya existe
+        
         const user = await User.findOne({ email });
         console.log('este es el back', user);
 
@@ -20,10 +20,10 @@ export async function POST(req) {
             return NextResponse.json({ message: 'El usuario ya existe' }, { status: 400 });
         }
 
-        // Encriptar la contraseña antes de guardarla
+     
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Crear nuevo usuario
+   
         const newUser = new User({ nombre, email, password: hashedPassword, role: 'user' });
         await newUser.save();
 
@@ -32,9 +32,9 @@ export async function POST(req) {
             { status: 201 }
         );
     } catch (error) {
-        console.error(error); // Mostrar el error en la consola
+        console.error(error); 
 
-        // Devolver un mensaje adecuado en caso de error
+        
         return NextResponse.json({ message: 'Ocurrió un error al procesar la solicitud' }, { status: 500 });
     }
 }

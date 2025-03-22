@@ -14,14 +14,14 @@ const Navbar = () => {
     const { usuario, Logout, carrito, eliminarProductoCart } = useEcommerce();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isopen, setisOpen] = useState(false);
-    console.log(isopen);
-
     const [valor, setValor] = useState({});
+
+
     const menu = () => {
         setisOpen(!isopen)
     }
 
-    console.log(valor);
+
 
     const openModal = () => setIsModalOpen(true);
     const closeModal = () => setIsModalOpen(false);
@@ -32,7 +32,7 @@ const Navbar = () => {
         return acumulador + item.precio * cantidad;
     }, 0);
 
-    // Función para manejar el cambio de cantidad por producto
+
     const handleChange = (e, productoId) => {
         setValor(prevValor => ({
             ...prevValor,
@@ -66,7 +66,7 @@ const Navbar = () => {
                                         <tr>
                                             <th scope="col" className="px-6 py-3">Productos</th>
                                             <th scope="col" className="px-6 py-3">Cantidad</th>
-                                            <th scope="col" className="px-6 py-3">Categoria</th>
+                                            <th scope="col" className="px-6 py-3">Imagen</th>
                                             <th scope="col" className="px-6 py-3">Precio</th>
                                             <th scope="col" className="px-6 py-3">Accion</th>
                                         </tr>
@@ -89,8 +89,8 @@ const Navbar = () => {
                                                         <option value={5}>5</option>
                                                     </select>
                                                 </td>
-                                                <td className="px-6 py-4">{producto.Categoria}</td>
-                                                <td className="px-6 py-4">{producto.precio}</td>
+                                                <td className="px-6 py-4"><Image width={40} height={40} src={producto.imagen} alt="" /></td>
+                                                <td className="px-6 py-4">  {producto.precio * (valor[producto._id] || 1)}</td>
                                                 <td className="px-6 py-4">
                                                     <a href="#" onClick={() => { eliminarProductoCart(producto._id) }} className="font-medium text-blue-600 dark:text-blue-500 hover:underline">Eliminar</a>
                                                 </td>
@@ -178,9 +178,9 @@ const Navbar = () => {
                     <div className="flex items-center">
                         <ul className="flex flex-row font-medium mt-0 space-x-8 rtl:space-x-reverse text-sm">
                             <li><Link href="/" className="text-gray-900 dark:text-white hover:underline" aria-current="page">Home</Link></li>
-                            <li><Link href="#" className="text-gray-900 dark:text-white hover:underline">Company</Link></li>
-                            <li><Link href="#" className="text-gray-900 dark:text-white hover:underline">Team</Link></li>
-                            <li><Link href="#" className="text-gray-900 dark:text-white hover:underline">Features</Link></li>
+                            <li><Link href="/pages/descuentos" className="text-gray-900 dark:text-white hover:underline">Descuentos</Link></li>
+                            <li><Link href="/pages/productos-exclusivos" className="text-gray-900 dark:text-white hover:underline">Productos exclusivos</Link></li>
+                            <li><Link href="/pages/futuros-productos" className="text-gray-900 dark:text-white hover:underline">Futuros productos</Link></li>
                         </ul>
                     </div>
                 </div>
