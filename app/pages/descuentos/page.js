@@ -7,12 +7,12 @@ import { useEcommerce } from "@/context/Contex"
 
 const Descuentos = () => {
     const { productos } = useEcommerce();
-    console.log(productos);
+   
 
     const descuentos = productos.filter((Producto) => Producto.Seccion === 'descuentos')
     return (
-        <div className=" ">
-            <h1 className="ml-20 p-8 font-medium">
+        <div>
+            <h1 className="sm:ml-20 p-8 font-medium">
                 Descuentos
             </h1>
             <div className="xl:mx-20 flex flex-wrap justify-center">
@@ -20,7 +20,7 @@ const Descuentos = () => {
                 {descuentos.map((product) => (
                     <div className="w-96 my-5" key={product._id}>
 
-                        <Card {...product} BotonHome={true} />
+                        <Card {...product} botonCarrito={true} botonMP={true} producto={product} />
 
                     </div>
                 ))}

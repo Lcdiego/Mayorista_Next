@@ -9,8 +9,10 @@ import Card from "./Card";
 
 const CategoryCarousel = ({ productos, Seccion }) => {
   const filteredProducts = Array.isArray(productos)
+  ? Seccion
     ? productos.filter((product) => product.Seccion === Seccion)
-    : [];
+    : productos 
+  : [];
 
   return (
     <div className="my-6">
@@ -28,7 +30,7 @@ const CategoryCarousel = ({ productos, Seccion }) => {
       >
         {filteredProducts.map((product) => (
           <SwiperSlide key={product._id}>
-            <Card {...product} BotonHome={true} />
+            <Card {...product} botonCarrito={true} />
           </SwiperSlide>
         ))}
       </Swiper>

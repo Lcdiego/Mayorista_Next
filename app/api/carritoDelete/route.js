@@ -8,7 +8,7 @@ await DB();
 export async function DELETE(req) {
     try {
         const { _id } = await req.json();
-console.log('esto es id',_id);
+
 
        
         const producto = await Carrito.findByIdAndDelete(_id);

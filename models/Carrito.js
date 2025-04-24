@@ -2,11 +2,17 @@ import mongoose from "mongoose";
 
 const CarritoSchema = new mongoose.Schema({
     usuario:{ type: String, required: true },
+    idProducto:{ type: String, required: true },
+    cantidad:{ type: Number, required: true },
     Seccion: { type: String, required: true },
     Categoria: { type: String, required: true },
     titulo: { type: String, required: true },
     precio: { type: Number, required: true },
     stock: { type: Number, required: true },
+    peso: { type: Number, required: true },
+    alto: { type: Number, required: true },
+    ancho: { type: Number, required: true },
+    largo: { type: Number, required: true },
     descripcion: { type: String, required: true },
     imagen: { type: String, default: null },
     galeria: { type: [String], default: [] },

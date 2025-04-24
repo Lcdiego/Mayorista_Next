@@ -1,33 +1,24 @@
 "use client";
 
-import { useEcommerce } from "@/context/Contex"
 import Card from "@/app/componentes/Card"
+import { useEcommerce } from "@/context/Contex"
 
-
-
-const ProductosAdmin = () => {
+const Productos = () => {
     const { productos } = useEcommerce()
- 
-
     return (
-        <div className=" ">
-            <h1 className="ml-20 p-8 font-medium">
-                Todos los productos
+        <div>
+           <h1 className="sm:ml-20 p-8 font-medium">
+                Productos
             </h1>
             <div className="xl:mx-20 flex flex-wrap justify-center">
-
                 {productos.map((product) => (
                     <div className="w-96 my-5" key={product._id}>
-
-                        <Card {...product} botonEliminarAdmin={true} BotonEditarAdmin={true} />
-
+                        <Card  {...product} botonCarrito={true} botonMP={true} />
                     </div>
                 ))}
             </div>
-
-
         </div>
     )
 }
 
-export default ProductosAdmin 
+export default Productos 

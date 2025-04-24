@@ -1,6 +1,6 @@
-import { DB } from '../../../lib/db';
+import { DB } from '../../../../lib/db';
 import { NextResponse } from 'next/server';
-import User from '../../../models/Users';
+import User from '../../../../models/Users';
 import bcrypt from 'bcryptjs'; 
 
 export async function POST(req) {
@@ -9,15 +9,15 @@ export async function POST(req) {
         const { nombre, email, password } = await req.json();
 
         if (!nombre || !email || !password) {
-            return NextResponse.json({ message: "Todos los campos son obligatorios" }, { status: 400 });
+            return NextResponse.json({ message: "Todos los campos son obligatorios" }, { status: 401 });
         }
 
         
         const user = await User.findOne({ email });
-        console.log('este es el back', user);
+     
 
         if (user) {
-            return NextResponse.json({ message: 'El usuario ya existe' }, { status: 400 });
+            return NextResponse.json({ message: 'El usuario ya existe' }, { status: 401 });
         }
 
      

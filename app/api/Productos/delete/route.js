@@ -13,8 +13,9 @@ export async function DELETE(req) {
     
 
 
+
       if (!producto)
-         return NextResponse.json({ message: 'no se recibieron datos del producto' }, { status: 404 });
+         return NextResponse.json({ message: 'No se recibieron datos del producto' }, { status: 404 });
    
       await cloudinary.uploader.destroy(producto.imagenPublicId);
 
@@ -24,7 +25,7 @@ export async function DELETE(req) {
       );
 
       await Productos.findByIdAndDelete(_id)
-      return NextResponse.json({ message: 'producto eliminado' }, { status: 200 })
+      return NextResponse.json({ message: 'Producto eliminado' }, { status: 200 })
 
    } catch (error) {
       return NextResponse.json({ message: 'Error al eliminar producto' }, { status: 500 })

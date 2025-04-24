@@ -4,18 +4,12 @@ import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
+import { useEcommerce } from "@/context/Contex";
 
-const images = [
-  "/mercado_1.png",
-  "/mercado_2.png",
-  "/mercado_3.png",
-  "/mercado_4.png",
-  "/mercado_5.png",
-  "/mercado_6.png",
-  
-];
 
 export default function FullScreenSwiper() {
+
+  const{banners}=useEcommerce();
   return (
     <Swiper
       modules={[Navigation, Pagination, Autoplay]}
@@ -26,9 +20,9 @@ export default function FullScreenSwiper() {
       loop 
       className="w-screen h-36 sm:h-auto" 
     >
-      {images.map((src, index) => (
-        <SwiperSlide key={index} className="flex justify-center items-center">
-          <img src={src} alt={`Slide ${index + 1}`} className="w-full h-full object-cover" />
+      {banners.map((items) => (
+        <SwiperSlide key={items._id} className="flex justify-center items-center">
+          <img src={items.imagen} alt={items.titulo} className="w-full h-full object-cover" />
         </SwiperSlide>
       ))}
     </Swiper>

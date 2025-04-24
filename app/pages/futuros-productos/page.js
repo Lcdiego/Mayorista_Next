@@ -7,12 +7,12 @@ import { useEcommerce } from "@/context/Contex"
 
 const FuturosProductos = () => {
     const { productos } = useEcommerce();
-    console.log(productos);
+   
 
     const FuturosProductos = productos.filter((Producto) => Producto.Seccion === 'FuturosProductos')
     return (
-        <div className=" ">
-            <h1 className="ml-20 p-8 font-medium">
+        <div>
+            <h1 className="sm:ml-20 p-8 font-medium">
             Futuros productos
             </h1>
             <div className="xl:mx-20 flex flex-wrap justify-center">
@@ -20,7 +20,7 @@ const FuturosProductos = () => {
                 {FuturosProductos.map((product) => (
                     <div className="w-96 my-5" key={product._id}>
 
-                        <Card {...product} BotonHome={true} />
+                        <Card {...product} botonCarrito={true} botonMP={true} />
 
                     </div>
                 ))}

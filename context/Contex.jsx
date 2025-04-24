@@ -8,45 +8,111 @@ const EcommerceContext = createContext();
 export const useEcommerce = () => useContext(EcommerceContext);
 
 const EcommerceProvider = ({ children }) => {
+
     const [productos, setProductos] = useState([]);
     const [usuario, setUsuario] = useState('');
+    const [token, setToken] = useState('');
     const [carrito, setCarrito] = useState([]);
     const [mensajes, setMensajes] = useState('');
     const [error, setError] = useState('');
-    const [loading, setLoading] = useState('');
-    const [seleccionarProductId, setSeleccionarProduct]=useState('');
+    const [loading, setLoading] = useState(false);
+    const [banners, setBanners] = useState([])
+
+
+    const [swal, setSwal] = useState(false);
+
     const router = useRouter()
 
 
-const detalle=(_id)=>{
-    setSeleccionarProduct(_id)
-}
-
     useEffect(() => {
-        const fetchProductos = async () => {
+        const verifyUser = async () => {
+            const token = localStorage.getItem('token');
+            if (!token) return;
+
             try {
-                const res = await fetch("/api/Productos/getProductos");
-                const data = await res.json();
-                setProductos(data);
+                const res = await axios.get('/api/VerifyToken', {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+
+                setUsuario(res.data.user);
             } catch (error) {
-                console.error("Error al obtener productos", error);
+                console.log('Token inválido o expirado');
+                localStorage.removeItem('token');
+                setUsuario('');
             }
         };
+
+        verifyUser();
+    }, []);
+
+
+
+
+
+    const MercadoPago = async (productos) => {
+        if (!usuario) {
+            router.push('/pages/login')
+            setMensajes('inicia sesion para comprar')
+            setTimeout(() => {
+                setMensajes('')
+            }, 3000);
+            return
+        }
+        try {
+
+            const items = Array.isArray(productos) ? productos : [productos];
+
+            const formateados = items.map((producto) => ({
+                title: producto.titulo,
+                price: producto.precio,
+                quantity: producto.cantidad || 1,
+                id: producto._id,
+                dimensions: `${producto.ancho}x${producto.alto}x${producto.largo},${producto.peso}`,
+            }));
+
+            const res = await axios.post("/api/createPreference", {
+                items: formateados,
+                buyer_zip_code: usuario?.direccion?.codigoPostal || '1903',
+            });
+
+            window.location.href = res.data.init_point;
+        } catch (error) {
+            console.error("Error al crear la preferencia:", error);
+        }
+    };
+
+
+
+    const fetchProductos = async () => {
+        try {
+            const res = await fetch("/api/Productos/getProductos");
+            const data = await res.json();
+            setProductos(data);
+        } catch (error) {
+            console.error("Error al obtener productos", error);
+        }
+    };
+
+    useEffect(() => {
         fetchProductos();
     }, []);
 
-   
+
+
     const fetchCarrito = async () => {
+        if (!usuario || !usuario._id) return;
         try {
             const response = await fetch('/api/carritoGet');
             const data = await response.json();
 
             const carrito = data.carrito;
-          
+
 
             const carritoUser = carrito.filter((item) => item.usuario === usuario._id);
 
-        
+
 
             setCarrito(carritoUser);
         } catch (error) {
@@ -55,30 +121,72 @@ const detalle=(_id)=>{
     };
 
     useEffect(() => {
-        if (usuario._id) {
-            fetchCarrito();
-        }
-    }, [usuario._id]);
+        if (usuario?._id)
+            fetchCarrito()
 
-    const addCarrito = async (_id) => {
+    }, [usuario]);
+
+
+    const fetchBanners = async () => {
         try {
-            const response = await axios.post('/api/carrito', { _id, idCarrito: usuario._id });
-            setMensajes(response.data.messaje);
+
+            const response = await fetch('/api/carousel/carouselGet')
+            const data = await response.json()
 
 
-            fetchCarrito();
+            setBanners(data)
+
+        } catch (error) {
+            console.error('eror al cargar imagenes', error)
+        }
+
+    }
+    useEffect(() => {
+        fetchBanners()
+
+
+    }, [])
+
+    const addCarrito = async (_id, cantidad = 1) => {
+
+
+
+        if (!usuario._id) {
+            router.push('/pages/login')
+            setMensajes('inicia secion para agregar al carrito')
+            setTimeout(() => {
+                setMensajes('')
+            }, 2000);
+        }
+        try {
+            const response = await axios.post('/api/addCarrito', { _id, idUsuario: usuario._id, cantidad });
+
+            setTimeout(() => {
+                setSwal(true);
+            }, 500);
+
+            fetchCarrito()
         } catch (error) {
             console.log('No se agregó producto al carrito', error);
             console.log(error.response.data.message);
         }
     };
+
+    useEffect(() => {
+        if (swal) {
+            const timer = setTimeout(() => setSwal(false), 500);
+            return () => clearTimeout(timer);
+        }
+    }, [swal]);
+
     const eliminarProductoCart = async (_id) => {
-       
+
 
         try {
             const response = await axios.delete('/api/carritoDelete', { data: { _id } })
-            console.log(response);
-            fetchCarrito();
+
+
+            fetchCarrito()
 
         } catch (error) {
             console.log('error al eliminar producto del carrito', error);
@@ -88,11 +196,53 @@ const detalle=(_id)=>{
     }
 
     const eliminarProducto = async (_id) => {
+
         try {
 
             const response = await axios.delete('/api/Productos/delete', { data: { _id } })
             console.log(response);
+            setMensajes(response.data.message);
+            setTimeout(() => {
+                setMensajes('');
+            }, 3000);
+            fetchProductos()
 
+        } catch (error) {
+            console.log('error para eliminar producto', error);
+
+        }
+
+
+    }
+
+    const actualizarProducto = async (id, data) => {
+        setLoading(true);
+        try {
+            const response = await axios.put(`/api/Productos/update/${id}`, data);
+            setLoading(false);
+            fetchProductos();
+            setMensajes(response.data.message)
+            setTimeout(() => {
+                setMensajes('')
+            }, 3000);
+        } catch (error) {
+            console.error("Error al actualizar el producto:", error);
+            alert("Error al actualizar el producto");
+        }
+    };
+
+    const eliminarImgCarousel = async (_id) => {
+
+        try {
+
+            const response = await axios.delete('/api/carousel/delete', { data: { _id } })
+            console.log(response);
+
+            setMensajes(response.data.message);
+            setTimeout(() => {
+                setMensajes('');
+            }, 3000);
+            fetchBanners()
 
         } catch (error) {
             console.log('error para eliminar producto', error);
@@ -104,7 +254,7 @@ const detalle=(_id)=>{
 
     const RegisterUser = async (data) => {
         try {
-            const response = await axios.post('/api/register', data);
+            const response = await axios.post('/api/user/register', data);
 
             setMensajes(response.data.message);
             setTimeout(() => {
@@ -121,30 +271,51 @@ const detalle=(_id)=>{
     };
 
     const Login = async (data) => {
-        setLoading(true)
+    
 
         try {
-            const response = await axios.post('/api/login', data);
-
-            setLoading(false)
-            setUsuario(response.data.user)
+            const response = await axios.post('/api/user/login', data);
 
 
+            const { token, user } = response.data
+            localStorage.setItem('token', token);
 
+            setUsuario(user);
+            setMensajes("Login exitoso");
+
+            setTimeout(() => {
+                setMensajes('');
+            }, 2000);
+            setTimeout(() => {
+
+            }, 2000);
             if (response.data.user.role === 'admin') {
-                router.push('/Sidebar')
+                router.push('/Sidebar');
             } else {
-                router.push('/')
+                router.push('/');
             }
+
         } catch (error) {
             console.log('Error al logearse');
-            setError(error.response.data.message)
+
+
+            setError(error.response?.data?.message || "Error en el servidor");
+
+
+            setTimeout(() => {
+                setError('');
+            }, 2000);
+
+          
         }
     };
 
+
     const Logout = () => {
-        setUsuario('')
-        router.push('/')
+        setUsuario(null);
+        localStorage.removeItem('token');
+        router.push('/');
+        
     };
 
     const agregarProductos = async (data) => {
@@ -155,14 +326,39 @@ const detalle=(_id)=>{
             setMensajes(response.data.message)
             setTimeout(() => {
                 setMensajes('')
-            }, 3000)
+            }, 3000);
+            fetchProductos()
         } catch (error) {
             console.log('Error al agregar product')
         }
     };
 
+    const agregarCarousel = async (data) => {
+        setLoading(true)
+        try {
+            const response = await fetch('/api/carousel/agregarCarousel', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            });
+
+            if (!response.ok) {
+                throw new Error('Error en la solicitud');
+            }
+
+            const result = await response.json();
+            console.log('Imagen subida correctamente', result);
+            fetchBanners()
+            setLoading(false)
+        } catch (error) {
+            console.log('Error al cargar imagen:', error.message);
+        }
+    };
+
     return (
-        <EcommerceContext.Provider value={{seleccionarProductId,detalle, productos, eliminarProducto, eliminarProductoCart, addCarrito, carrito, RegisterUser, Login, loading, Logout, usuario, mensajes, error, agregarProductos }}>
+        <EcommerceContext.Provider value={{ MercadoPago, swal, productos, eliminarProducto, actualizarProducto, eliminarProductoCart, eliminarImgCarousel, addCarrito, carrito, RegisterUser, Login, loading, Logout, usuario, mensajes, error, agregarProductos, agregarCarousel, banners }}>
             {children}
         </EcommerceContext.Provider>
     )

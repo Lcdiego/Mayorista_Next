@@ -7,119 +7,139 @@ import { IoCloseCircleOutline } from "react-icons/io5";
 import { IoCartOutline } from "react-icons/io5";
 import { LiaUser } from "react-icons/lia";
 import { RiMenu2Fill } from "react-icons/ri";
+import { SwalCarrito } from "./Swal";
+import { FcSearch } from "react-icons/fc";
+import { useRouter } from "next/navigation";
+import Carrito from "./Carrito";
 
 
 
 const Navbar = () => {
-    const { usuario, Logout, carrito, eliminarProductoCart } = useEcommerce();
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const { usuario, Logout, carrito, swal } = useEcommerce();
+
     const [isopen, setisOpen] = useState(false);
-    const [valor, setValor] = useState({});
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const openModal = () => setIsModalOpen(!isModalOpen);
+    const closeModal = () => setIsModalOpen(false);
+
+    const [searchTerm, setSearchTerm] = useState('');
+
+
+
+
+    const router = useRouter();
+
+
+
+    const handleSearch = (e) => {
+        e.preventDefault();
+        if (searchTerm.trim() !== "") {
+            router.push(`/pages/busqueda?query=${encodeURIComponent(searchTerm)}`);
+        }
+        setTimeout(() => {
+            setSearchTerm('')
+        }, 3000);
+    };
 
 
     const menu = () => {
         setisOpen(!isopen)
     }
 
-
-
-    const openModal = () => setIsModalOpen(true);
-    const closeModal = () => setIsModalOpen(false);
-
-
-    const total = carrito.reduce((acumulador, item) => {
-        const cantidad = valor[item._id] || 1;
-        return acumulador + item.precio * cantidad;
-    }, 0);
-
-
-    const handleChange = (e, productoId) => {
-        setValor(prevValor => ({
-            ...prevValor,
-            [productoId]: e.target.value
-        }));
-    };
-
     return (
         <div>
-            {isModalOpen && (
-                <div id="right-bottom-modal" tabIndex="-1" className="fixed top-20 right-4 z-50 p-5 overflow-x-hidden overflow-y-auto h-auto max-h-full">
-                    <div className="relative">
-                        <div className="relative bg-white rounded-lg shadow-sm dark:bg-white">
-                            <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200">
-                                <h3 className="text-xl font-medium text-gray-900 dark:text-black">Carrito</h3>
-                                <button
-                                    type="button"
-                                    onClick={closeModal}
-                                    className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
-                                >
-                                    <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
-                                    </svg>
-                                    <span className="sr-only">Close modal</span>
-                                </button>
-                            </div>
+            {swal ? <SwalCarrito /> : ''}
+            <Carrito isModalOpen={isModalOpen} closeModal={closeModal} />
 
-                            <div className="relative overflow-x-auto shadow-md ">
-                                <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                                    <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                                        <tr>
-                                            <th scope="col" className="px-6 py-3">Productos</th>
-                                            <th scope="col" className="px-6 py-3">Cantidad</th>
-                                            <th scope="col" className="px-6 py-3">Imagen</th>
-                                            <th scope="col" className="px-6 py-3">Precio</th>
-                                            <th scope="col" className="px-6 py-3">Accion</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {carrito.map((producto) => (
-                                            <tr key={producto._id} className="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700 border-gray-200">
-                                                <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                                    {producto.titulo}
-                                                </th>
-                                                <td className="px-6 py-4">
-                                                    <select
-                                                        value={valor[producto._id] || 1} // Si no hay valor, usamos 1 como valor por defecto
-                                                        onChange={(e) => handleChange(e, producto._id)} // Pasamos el id del producto al cambiar la cantidad
-                                                    >
-                                                        <option value={1}>1</option>
-                                                        <option value={2}>2</option>
-                                                        <option value={3}>3</option>
-                                                        <option value={4}>4</option>
-                                                        <option value={5}>5</option>
-                                                    </select>
-                                                </td>
-                                                <td className="px-6 py-4"><Image width={40} height={40} src={producto.imagen} alt="" /></td>
-                                                <td className="px-6 py-4">  {producto.precio * (valor[producto._id] || 1)}</td>
-                                                <td className="px-6 py-4">
-                                                    <a href="#" onClick={() => { eliminarProductoCart(producto._id) }} className="font-medium text-blue-600 dark:text-blue-500 hover:underline">Eliminar</a>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            <div className="flex justify-between p-4 md:p-5 space-x-3 rtl:space-x-reverse border-t border-gray-200 rounded-b dark:border-gray-600">
-                                <button onClick={closeModal} type="button" className="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-blue-400 rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">
-                                    Comprar
-                                </button>
-                                <h3 className="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-blue-400 rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">
-                                    Total: {total}
-                                </h3>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            <nav className="bg-white border-gray-200 dark:bg-gray-900">
+            <nav className="bg-white border-gray-200 dark:bg-gray-200">
                 <div className="flex flex-wrap justify-between items-center mx-5 xl:mx-40 max-w-screen-xl p-4">
                     <Link href="/" className="flex items-center space-x-3 rtl:space-x-reverse">
-                        <Image width={60} height={60} src="/camaleon.png" alt="camaleon Logo" />
-                        <span className="self-center text-md sm:text-2xl font-semibold whitespace-nowrap dark:text-white">Juliana Genia</span>
+                        <Image width={100} height={100} src="/Logo.png" alt="camaleon Logo" />
+
                     </Link>
-                    <div className="flex items-center space-x-6 rtl:space-x-reverse relative">
+
+                    <div className="flex items-center">
+                        {isopen ? (<nav className="sm:hidden absolute top-20 right-0 rounded-sm z-10 bg-gray-50 ">
+                            <div className="max-w-screen-xl px-4 py-3 mx-auto">
+                                <div className="flex items-center">
+                                    <ul className="flex flex-col font-medium ">
+
+                                        <div className="sm:hidden flex items-center space-x-6 rtl:space-x-reverse relative">
+
+                                            {usuario ? (
+                                                <div className="flex items-center">
+                                                    Hola! {String(usuario.nombre)}
+                                                    <div className="ml-2 flex items-center">
+                                                        <IoCloseCircleOutline onClick={Logout}   size={20} />
+                                                    </div>
+                                                    <button onClick={openModal} className="ml-2 relative">
+                                                        {usuario.role === 'admin' ? (
+                                                            ''
+                                                        ) : (
+                                                            <>
+                                                                {carrito.length > 0 && (
+                                                                    <div className="absolute top-0 right-2 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
+                                                                        {carrito.length}
+                                                                    </div>
+                                                                )}
+                                                                <IoCartOutline size={40} />
+                                                            </>
+                                                        )}
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <div className="flex" >
+                                                    <Link href="/pages/login"
+                                                        onClick={() => { menu() }}
+                                                        className="dark:text-black hover:underline hover:text-blue-400">
+                                                        <LiaUser size={35} />
+                                                    </Link>
+                                                    <IoCartOutline size={40} className="ml-10" />
+                                                </div>
+
+                                            )}
+
+                                        </div>
+                                        <li><Link href="/" onClick={() => { menu() }} className="text-gray-900 hover:underline" aria-current="page">Home</Link></li>
+                                        <li><Link href="/pages/Oferta-del-dia" onClick={() => { menu() }} className="text-gray-900 hover:underline">Oferta del día</Link></li>
+                                        <li><Link href="/pages/descuentos" onClick={() => { menu() }} className="text-gray-900 hover:underline">Descuentos</Link></li>
+                                        <li><Link href="/pages/productos" onClick={() => { menu() }} className="text-gray-900 hover:underline">Productos</Link></li>
+                                        <li><Link href="/pages/productos-exclusivos" onClick={() => { menu() }} className="text-gray-900 hover:underline">Productos exclusivos</Link></li>
+                                        <li><Link href="/pages/futuros-productos" onClick={() => { menu() }} className="text-gray-900 hover:underline">Futuros productos</Link></li>
+
+                                    </ul>
+                                </div>
+                            </div>
+                        </nav>) : ('')}
+
+
+                        <div className="sm:hidden ml-10" onClick={() => { menu() }}>
+                            <RiMenu2Fill size={25} />
+                        </div>
+
+
+                    </div>
+
+                    <form onSubmit={handleSearch} className="mt-5 flex-grow flex justify-center mx-4">
+                        <div className="relative w-full sm:w-96">
+
+                            <button type="submit" className="absolute left-3 top-1/2 transform -translate-y-1/2">
+                                <FcSearch size={20} />
+                            </button>
+
+
+                            <input
+                                type="text"
+                                placeholder="Buscar productos..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full pl-10 pr-4 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                            />
+                        </div>
+                    </form>
+
+                    <div className="hidden sm:flex sm:items-center space-x-6 rtl:space-x-reverse relative">
 
                         {usuario ? (
                             <div className="flex items-center">
@@ -141,35 +161,15 @@ const Navbar = () => {
                                         </>
                                     )}
                                 </button>
-
                             </div>
-
                         ) : (
-                            <div className="flex items-center">
-                                {isopen ? (<nav className="sm:hidden absolute top-16 left-10 z-10 bg-gray-50 dark:bg-gray-700">
-                                    <div className="max-w-screen-xl px-4 py-3 mx-auto">
-                                        <div className="flex items-center">
-                                            <ul className="flex flex-col font-medium ">
-                                                <li><Link href="/" onClick={() => { menu() }} className="text-gray-900 dark:text-white hover:underline" aria-current="page">Home</Link></li>
-                                                <li><Link href="#" onClick={() => { menu() }} className="text-gray-900 dark:text-white hover:underline">Company</Link></li>
-                                                <li><Link href="#" onClick={() => { menu() }} className="text-gray-900 dark:text-white hover:underline">Team</Link></li>
-                                                <li><Link href="#" onClick={() => { menu() }} className="text-gray-900 dark:text-white hover:underline">Features</Link></li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </nav>) : ('')}
-
-                                <div className="">
-                                    <Link href="/pages/login" className=" dark:text-blue-500 hover:underline hover:text-blue-400"><LiaUser size={35} /></Link>
-                                </div>
-                                <div className="sm:hidden ml-10" onClick={() => { menu() }}>
-                                    <RiMenu2Fill size={25} />
-                                </div>
-
-
+                            <div className="hidden  sm:flex">
+                                <Link href="/pages/login" className="dark:text-black hover:underline hover:text-blue-400"><LiaUser size={35} /></Link>
+                                <IoCartOutline size={40} className="ml-10" />
                             </div>
 
                         )}
+
                     </div>
                 </div>
             </nav>
@@ -178,9 +178,12 @@ const Navbar = () => {
                     <div className="flex items-center">
                         <ul className="flex flex-row font-medium mt-0 space-x-8 rtl:space-x-reverse text-sm">
                             <li><Link href="/" className="text-gray-900 dark:text-white hover:underline" aria-current="page">Home</Link></li>
+                            <li><Link href="/pages/Oferta-del-dia" className="text-gray-900 dark:text-white hover:underline">Oferta del día</Link></li>
                             <li><Link href="/pages/descuentos" className="text-gray-900 dark:text-white hover:underline">Descuentos</Link></li>
+                            <li><Link href="/pages/productos" className="text-gray-900 dark:text-white hover:underline">Productos</Link></li>
                             <li><Link href="/pages/productos-exclusivos" className="text-gray-900 dark:text-white hover:underline">Productos exclusivos</Link></li>
                             <li><Link href="/pages/futuros-productos" className="text-gray-900 dark:text-white hover:underline">Futuros productos</Link></li>
+
                         </ul>
                     </div>
                 </div>
