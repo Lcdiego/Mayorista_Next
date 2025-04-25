@@ -55,6 +55,7 @@ const DetalleProducto = () => {
       setError("Por favor, ingresa un código postal.");
       return;
     }
+console.log(codigoPostal);
 
     try {
       const response = await fetch(`/api/calcular-envio?codigoPostal=${codigoPostal}`);
@@ -64,6 +65,7 @@ const DetalleProducto = () => {
         setError(data.error);
         return;
       }
+console.log(data);
 
       setCostoEnvio(data.costoEnvio);
       setError('');

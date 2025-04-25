@@ -54,35 +54,45 @@ const EcommerceProvider = ({ children }) => {
     const MercadoPago = async (productos) => {
         if (!usuario) {
             router.push('/pages/login')
-            setMensajes('inicia sesion para comprar')
+            setMensajes('Inicia sesión para comprar')
             setTimeout(() => {
                 setMensajes('')
             }, 3000);
             return
         }
+    
         try {
-
             const items = Array.isArray(productos) ? productos : [productos];
-
-            const formateados = items.map((producto) => ({
-                title: producto.titulo,
-                price: producto.precio,
-                quantity: producto.cantidad || 1,
-                id: producto._id,
-                dimensions: `${producto.ancho}x${producto.alto}x${producto.largo},${producto.peso}`,
-            }));
-
+    
+            // Formatear los productos
+            const formateados = items.map((producto) => {
+                const cantidad = producto.cantidad || 1;
+    
+                // Calcular dimensiones y peso totales
+                const pesoTotal = producto.peso * cantidad; // Peso en gramos
+                const dimensiones = `${producto.largo}x${producto.ancho}x${producto.alto}`; // Dimensiones en formato largo x ancho x alto
+    
+                return {
+                    title: producto.titulo,
+                    price: producto.precio,
+                    quantity: cantidad,
+                    id: producto._id,
+                    dimensions: dimensiones, // Mercado Pago espera la forma "Largo x Ancho x Alto"
+                    weight: pesoTotal, // El peso total en gramos
+                };
+            });
+    
             const res = await axios.post("/api/createPreference", {
                 items: formateados,
-                buyer_zip_code: usuario?.direccion?.codigoPostal || '1903',
+                buyer_zip_code: usuario?.direccion?.codigoPostal || '1903', // Código postal del usuario
             });
-
-            window.location.href = res.data.init_point;
+    
+            window.location.href = res.data.init_point; // Redirigir a Mercado Pago para completar el pago
         } catch (error) {
             console.error("Error al crear la preferencia:", error);
         }
     };
-
+    
 
 
     const fetchProductos = async () => {
