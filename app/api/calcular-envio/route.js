@@ -1,50 +1,47 @@
 import { NextResponse } from "next/server";
-import { getValidAccessToken } from "@/lib/mercadolibre";  // Importa la función getValidAccessToken
+import { getValidAccessToken } from "@/lib/mercadolibre";
 
 export async function GET(req) {
+  try {
     const { searchParams } = new URL(req.url);
+    const itemId = searchParams.get("itemId");
     const codigoPostal = searchParams.get("codigoPostal");
 
-    console.log("🧾 Código postal recibido:", codigoPostal);
-
-    if (!codigoPostal) {
-        return NextResponse.json({ error: "Código postal es requerido" }, { status: 400 });
+    if (!itemId || !codigoPostal) {
+      return NextResponse.json(
+        { error: "Item ID y código postal son requeridos" },
+        { status: 400 }
+      );
     }
 
-    try {
-        const accessToken = await getValidAccessToken();  // Obtiene un token válido
-        console.log("🔑 Access token obtenido:", accessToken);
+    const accessToken = await getValidAccessToken();
 
-        const params = {
-            origen: { zip: "1903" },
-            destino: { zip: codigoPostal },
-            envio: { volumen: 1, peso: 0.5 },
-        };
+    const url = `https://api.mercadolibre.com/items/${itemId}/shipping_options?zip_code=${codigoPostal}`;
 
-        console.log("📦 Parámetros para calcular envío:", params);
+    const res = await fetch(url, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+    });
 
-        const response = await fetch("https://api.mercadolibre.com/mercadoenvios/v1/items/price", {
-            method: "POST",
-            headers: {
-                Authorization: `Bearer ${accessToken}`,
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(params),
-        });
+    const data = await res.json();
 
-        const data = await response.json();
-
-        console.log("📨 Respuesta de Mercado Envíos:", data);
-
-        if (data.error) {
-            return NextResponse.json({ error: data.error }, { status: 400 });
-        }
-
-        const costoEnvio = data.costo_envio;
-        return NextResponse.json({ costoEnvio }, { status: 200 });
-
-    } catch (error) {
-        console.error("❌ Error en /api/calcular-envio:", error);
-        return NextResponse.json({ error: "Hubo un error al calcular el costo de envío" }, { status: 500 });
+    if (!res.ok) {
+      console.error("❌ Error en consulta de opciones de envío:", data);
+      return NextResponse.json(
+        { error: data.message || "Error al obtener opciones de envío" },
+        { status: res.status }
+      );
     }
+
+    return NextResponse.json(data, { status: 200 });
+  } catch (error) {
+    console.error("❌ Error general en /api/calcular-envio:", error);
+    return NextResponse.json(
+      { error: "Hubo un problema al calcular el costo de envío" },
+      { status: 500 }
+    );
+  }
 }

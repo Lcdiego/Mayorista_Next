@@ -19,7 +19,7 @@ const DetalleProducto = () => {
   const [imagenSeleccionada, setImagenSeleccionada] = useState(null);
   const [valor, setValor] = useState({});
   const [codigoPostal, setCodigoPostal] = useState('');
-  const [costoEnvio, setCostoEnvio] = useState(null);
+  const [shippingOptions, setShippingOptions] = useState([]);
   const [error, setError] = useState('');
 
   const params = useParams();
@@ -49,28 +49,26 @@ const DetalleProducto = () => {
   const cantidad = valor[producto._id] || 1;
   const total = producto.precio * cantidad;
 
-  // Función para calcular el costo de envío
+  // Función para calcular las opciones de envío
   const calcularEnvio = async () => {
     if (!codigoPostal) {
       setError("Por favor, ingresa un código postal.");
       return;
     }
-console.log(codigoPostal);
 
     try {
-      const response = await fetch(`/api/calcular-envio?codigoPostal=${codigoPostal}`);
+      const response = await fetch(`/api/calcular-envio?itemId=${producto.id_meli}&codigoPostal=${codigoPostal}`);
       const data = await response.json();
 
-      if (data.error) {
-        setError(data.error);
-        return;
+      if (response.ok) {
+        setShippingOptions(data.options || []);
+        setError('');
+      } else {
+        setError(data.error || 'Error al calcular envío');
       }
-console.log(data);
-
-      setCostoEnvio(data.costoEnvio);
-      setError('');
     } catch (err) {
-      setError('Error al calcular el costo de envío');
+      console.error("Error al calcular envío:", err);
+      setError('Error de red al calcular el costo de envío');
     }
   };
 
@@ -131,8 +129,9 @@ console.log(data);
         <div className="w-full lg:w-1/2 flex flex-col items-center lg:items-center">
           <div className="w-full max-w-md bg-white p-5 rounded-lg shadow-lg border">
             <h2 className="text-2xl font-bold text-gray-800 text-center lg:text-left">{producto.titulo}</h2>
+
             <select
-              className="mt-4  border rounded p-2"
+              className="mt-4 border rounded p-2"
               value={valor[producto._id] || 1}
               onChange={(e) => handleChange(e, producto._id)}
             >
@@ -142,6 +141,7 @@ console.log(data);
                 </option>
               ))}
             </select>
+
             <p className="text-gray-500 mt-2">Stock: {producto.stock}</p>
 
             <div className="mt-4 flex flex-wrap items-center gap-2">
@@ -158,7 +158,7 @@ console.log(data);
               6 cuotas sin interés de ${(total / 6).toFixed(2)}
             </p>
 
-            {/* Campo para calcular el costo de envío */}
+            {/* Campo para calcular opciones de envío */}
             <div className="mt-4">
               <input
                 type="text"
@@ -171,11 +171,22 @@ console.log(data);
                 onClick={calcularEnvio}
                 className="mt-2 bg-blue-500 text-white py-2 px-4 rounded"
               >
-                Calcular Costo de Envío
+                Calcular Envío
               </button>
+
               {error && <p className="text-red-500 mt-2">{error}</p>}
-              {costoEnvio !== null && (
-                <p className="mt-2 text-green-500">Costo de envío estimado: ${costoEnvio}</p>
+
+              {shippingOptions.length > 0 && (
+                <div className="mt-4">
+                  <h4 className="font-semibold mb-2">Opciones de envío:</h4>
+                  <ul className="space-y-2">
+                    {shippingOptions.map((option, idx) => (
+                      <li key={idx} className="text-green-600">
+                        {option.name} - ${option.cost} - Entrega: {option.estimated_delivery_time?.unit} {option.estimated_delivery_time?.value}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               )}
             </div>
           </div>

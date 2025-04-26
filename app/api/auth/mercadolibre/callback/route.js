@@ -8,7 +8,7 @@ export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
     const code = searchParams.get("code");
-
+    console.log("🚨 Código recibido:", code); 
     if (!code) {
       return Response.json({ error: "Falta el parámetro 'code'" }, { status: 400 });
     }
