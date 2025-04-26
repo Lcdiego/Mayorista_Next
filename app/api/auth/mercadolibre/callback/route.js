@@ -2,6 +2,7 @@
 
 import { DB } from "@/lib/db";
 import MercadoLibreToken from "@/models/MercadoLibreToken";
+import { redirect } from "next/navigation"; // 👈 IMPORTANTE
 
 export async function GET(req) {
   try {
@@ -12,7 +13,7 @@ export async function GET(req) {
       return Response.json({ error: "Falta el parámetro 'code'" }, { status: 400 });
     }
 
-    await DB(); // conectar
+    await DB(); // conectar a MongoDB
 
     const res = await fetch("https://api.mercadolibre.com/oauth/token", {
       method: "POST",
@@ -27,16 +28,15 @@ export async function GET(req) {
     });
 
     const data = await res.json();
-    console.log("📨 Respuesta de Mercado Envíos:", data);
+    console.log("📨 Respuesta de Mercado Libre:", data);
 
     if (data.error) {
       return Response.json({ error: data.error_description || "Error al obtener el token" }, { status: 500 });
     }
 
     const { access_token, refresh_token, expires_in, user_id } = data;
-    const expires_at = new Date(Date.now() + expires_in * 1000);
+    const expires_at = new Date(Date.now() + expires_in * 1000);    
 
-    // Buscar token del usuario
     let existingToken = null;
     try {
       existingToken = await MercadoLibreToken.findOne({ user_id });
@@ -50,8 +50,9 @@ export async function GET(req) {
       existingToken.refresh_token = refresh_token;
       existingToken.expires_at = expires_at;
       await existingToken.save();
+      console.log("✅ Token actualizado exitosamente en MongoDB");
     } else {
-      // Crear primer token (nueva colección si es necesario)
+      // Crear nuevo token
       try {
         const newToken = new MercadoLibreToken({
           access_token,
@@ -67,12 +68,8 @@ export async function GET(req) {
       }
     }
 
-    return Response.json({
-      message: "✅ Token guardado o actualizado correctamente.",
-      access_token,
-      refresh_token,
-      expires_in,
-    });
+    // 🔥 Redirigir al home (o a donde quieras)
+    redirect("/");
 
   } catch (error) {
     console.error("Error en el callback:", error);
