@@ -12,21 +12,17 @@ export async function GET(req) {
       return Response.json({ error: "Falta el parámetro 'code'" }, { status: 400 });
     }
 
-    // Conexión a la base de datos
-    await DB();
+    await DB(); // conectar
 
-    // Solicitud del token a Mercado Libre
     const res = await fetch("https://api.mercadolibre.com/oauth/token", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({
         grant_type: "authorization_code",
         client_id: process.env.ML_CLIENT_ID,
         client_secret: process.env.ML_CLIENT_SECRET,
         code,
-        redirect_uri: "https://mundoshop.com.ar/api/auth/mercadolibre/callback", // URI real registrada en ML
+        redirect_uri: "https://mundoshop.com.ar/api/auth/mercadolibre/callback",
       }),
     });
 
@@ -39,24 +35,45 @@ export async function GET(req) {
     const { access_token, refresh_token, expires_in, user_id } = data;
     const expires_at = new Date(Date.now() + expires_in * 1000);
 
-    // Guardar los tokens en MongoDB
-    const newToken = new MercadoLibreToken({
-      access_token,
-      refresh_token,
-      expires_at,
-      user_id,
-    });
+    // Buscar token del usuario
+    let existingToken = null;
+    try {
+      existingToken = await MercadoLibreToken.findOne({ user_id });
+    } catch (findError) {
+      console.error("Error buscando token en MongoDB:", findError);
+    }
 
-    await newToken.save();
+    if (existingToken) {
+      // Actualizar token existente
+      existingToken.access_token = access_token;
+      existingToken.refresh_token = refresh_token;
+      existingToken.expires_at = expires_at;
+      await existingToken.save();
+    } else {
+      // Crear primer token (nueva colección si es necesario)
+      try {
+        const newToken = new MercadoLibreToken({
+          access_token,
+          refresh_token,
+          expires_at,
+          user_id,
+        });
+        await newToken.save();
+      } catch (saveError) {
+        console.error("Error guardando nuevo token en MongoDB:", saveError);
+        return Response.json({ error: "Error guardando el token en la base de datos" }, { status: 500 });
+      }
+    }
 
     return Response.json({
-      message: "✅ Tokens guardados correctamente.",
+      message: "✅ Token guardado o actualizado correctamente.",
       access_token,
       refresh_token,
       expires_in,
     });
+
   } catch (error) {
     console.error("Error en el callback:", error);
-    return Response.json({ error: "Error inesperado" }, { status: 500 });
+    return Response.json({ error: "Error inesperado en el servidor" }, { status: 500 });
   }
 }
