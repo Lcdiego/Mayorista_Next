@@ -27,6 +27,7 @@ export async function GET(req) {
     });
 
     const data = await res.json();
+    console.log("📨 Respuesta de Mercado Envíos:", data);
 
     if (data.error) {
       return Response.json({ error: data.error_description || "Error al obtener el token" }, { status: 500 });
@@ -59,6 +60,7 @@ export async function GET(req) {
           user_id,
         });
         await newToken.save();
+        console.log("✅ Token guardado exitosamente en MongoDB");
       } catch (saveError) {
         console.error("Error guardando nuevo token en MongoDB:", saveError);
         return Response.json({ error: "Error guardando el token en la base de datos" }, { status: 500 });
