@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
 const ProductosSchema = new mongoose.Schema({
+    id_meli: { type: String, required: true },
     Seccion: { type: String, required: true },
     Categoria: { type: String, required: true },
     titulo: { type: String, required: true },

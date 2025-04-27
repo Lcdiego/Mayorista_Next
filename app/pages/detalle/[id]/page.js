@@ -24,6 +24,7 @@ const DetalleProducto = () => {
 
   const params = useParams();
   const producto = productos.find((item) => item._id === params.id);
+console.log(producto);
 
   useEffect(() => {
     if (producto && !imagenSeleccionada && producto.imagen) {
@@ -55,11 +56,17 @@ const DetalleProducto = () => {
       setError("Por favor, ingresa un código postal.");
       return;
     }
-
+  
     try {
-      const response = await fetch(`/api/calcular-envio?itemId=${producto.id_meli}&codigoPostal=${codigoPostal}`);
+      const productoEnvio = {
+        codigo_postal: '1903', // Código postal de tu tienda o almacén
+        peso: 0.5, // Peso del producto (en kg)
+        dimensiones: { length: 20, width: 30, height: 15 }, // Dimensiones del paquete
+      };
+  
+      const response = await fetch(`/api/calcular-envio?codigoPostal=${codigoPostal}&producto=${JSON.stringify(productoEnvio)}`);
       const data = await response.json();
-
+  
       if (response.ok) {
         setShippingOptions(data.options || []);
         setError('');
@@ -71,7 +78,7 @@ const DetalleProducto = () => {
       setError('Error de red al calcular el costo de envío');
     }
   };
-
+  
   return (
     <div className="flex flex-col px-4 sm:px-10 md:px-20">
       <div className="flex flex-col lg:flex-row gap-10 mt-10">
