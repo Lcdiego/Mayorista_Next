@@ -1,44 +1,41 @@
-export async function GET(req) {
+export async function POST(req) {
   try {
-    const { searchParams } = new URL(req.url);
-    const codigoPostal = searchParams.get("codigoPostal");
-    const productoEnvio = JSON.parse(searchParams.get("producto"));
+    const { origenZip, destinoZip, peso, dimensiones } = await req.json();
 
-    if (!codigoPostal || !productoEnvio) {
-      return NextResponse.json(
-        { error: "Código postal y producto son requeridos" },
-        { status: 400 }
-      );
+    if (!origenZip || !destinoZip || !peso || !dimensiones) {
+      return NextResponse.json({ error: "Faltan datos para calcular el envío" }, { status: 400 });
     }
 
-    const { codigo_postal, peso, dimensiones } = productoEnvio;
+    const accessToken = await getValidAccessToken(); // ¡Esto debe traer el token real!
+    const userId = process.env.ML_CLIENT_ID; // Aquí debes poner tu ID de vendedor de Mercado Libre.
 
-    // Llamada a la API de Mercado Envíos usando los datos de peso, dimensiones y códigos postales
-    const url = `https://api.mercadolibre.com/sites/MLA/shipping_modes?zip_code=${codigoPostal}&origin_zip_code=${codigo_postal}&weight=${peso}&dimensions=${dimensiones.length},${dimensiones.width},${dimensiones.height}`;
-
-    const res = await fetch(url, {
-      method: "GET",
+    const res = await fetch(`https://api.mercadolibre.com/users/${userId}/shipping_options`, {
+      method: "POST",
       headers: {
-        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json"
       },
+      body: JSON.stringify({
+        zip_code: destinoZip,
+        dimensions: {
+          height: dimensiones.height,
+          width: dimensiones.width,
+          length: dimensiones.length,
+          weight: peso
+        }
+      })
     });
 
     const data = await res.json();
 
     if (!res.ok) {
-      console.error("❌ Error en consulta de opciones de envío:", data);
-      return NextResponse.json(
-        { error: data.message || "Error al obtener opciones de envío" },
-        { status: res.status }
-      );
+      console.error("❌ Error en respuesta de cálculo de envío:", data);
+      return NextResponse.json({ error: data.message }, { status: res.status });
     }
 
     return NextResponse.json(data, { status: 200 });
   } catch (error) {
     console.error("❌ Error general en /api/calcular-envio:", error);
-    return NextResponse.json(
-      { error: "Hubo un problema al calcular el costo de envío" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Error al calcular envío" }, { status: 500 });
   }
 }

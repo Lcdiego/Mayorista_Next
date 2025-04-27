@@ -52,31 +52,23 @@ console.log(producto);
 
   // Función para calcular las opciones de envío
   const calcularEnvio = async () => {
-    if (!codigoPostal) {
-      setError("Por favor, ingresa un código postal.");
-      return;
-    }
+    const productoEnvio = {
+      origenZip: "1903",
+      destinoZip: codigoPostalCliente,
+      peso: 0.5,
+      dimensiones: { length: 20, width: 30, height: 15 }
+    };
   
-    try {
-      const productoEnvio = {
-        codigo_postal: '1903', // Código postal de tu tienda o almacén
-        peso: 0.5, // Peso del producto (en kg)
-        dimensiones: { length: 20, width: 30, height: 15 }, // Dimensiones del paquete
-      };
+    const res = await fetch("/api/calcular-envio", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(productoEnvio)
+    });
   
-      const response = await fetch(`/api/calcular-envio?codigoPostal=${codigoPostal}&producto=${JSON.stringify(productoEnvio)}`);
-      const data = await response.json();
-  
-      if (response.ok) {
-        setShippingOptions(data.options || []);
-        setError('');
-      } else {
-        setError(data.error || 'Error al calcular envío');
-      }
-    } catch (err) {
-      console.error("Error al calcular envío:", err);
-      setError('Error de red al calcular el costo de envío');
-    }
+    const data = await res.json();
+    console.log("Opciones de envío:", data);
   };
   
   return (
